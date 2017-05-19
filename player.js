@@ -1,8 +1,8 @@
 /* Construct player */
-function Player (x, y) {
+function Player () {
     /* Set initial position */
-    this.x = x;
-    this.y = y;
+    this.x = 0;
+    this.y = 0;
     this.dx = 0;
     this.dy = 0;
     this.speed = 0.5;
