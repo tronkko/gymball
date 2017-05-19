@@ -14,8 +14,7 @@ function Game () {
     this.ctx = canvas.getContext ('2d');
 
     /* Resize canvas to fill the screen */
-    this.canvas.width = document.body.clientWidth;
-    this.canvas.height = document.body.clientHeight;
+    this.resize ();
 
     /* Position player in the middle of screen */
     var w = this.canvas.width;
@@ -46,7 +45,7 @@ Game.prototype.setup = function (level) {
     case 0:
         this.scene = new Scene ({
             startpos: [ 150, 480 ],
-            bounds: [ 10, 10, 500, 1000 ],
+            bounds: [ 10, 10, 1920, 1024 ],
             bg: 'img/bg.png',
             images: {
                 counter: 'img/counter.png',
@@ -82,9 +81,16 @@ Game.prototype.setup = function (level) {
 
 /* Handle window resize */
 Game.prototype.resize = function (e) {
-    /* Resize canvas */
-    this.canvas.width = document.body.clientWidth;
-    this.canvas.height = document.body.clientHeight;
+    /* Compute aspect ratio */
+    var ratio = this.canvas.width / this.canvas.height;
+
+    /* Compute new width and height */
+    var h = window.innerHeight;
+    var w = Math.round (h * ratio);
+
+    /* Scale canvas */
+    this.canvas.style.width = w+'px';
+    this.canvas.style.height = h+'px';
 };
 
 /* Update player position */
@@ -122,14 +128,21 @@ Game.prototype.update = function () {
     }
     this.path[this.path.length] = [ x, y ];
 
+    /* Compute aspect ratio */
+    var ratio = this.canvas.width / this.canvas.height;
+
+    /* Compute width and height of screen in scaled coordinates */
+    var w = window.innerWidth * (this.canvas.height / window.innerHeight);
+    var h = window.innerHeight * (this.canvas.height / window.innerHeight);
+
     /* Center screen on player */
-    var x0 = x - this.canvas.width / 2;
-    var y0 = y - this.canvas.height / 2;
-    if (x0 + this.canvas.width > bounds[2] + this.borderwidth) {
-        x0 = bounds[2] + this.borderwidth - this.canvas.width;
+    var x0 = x - w / 2;
+    var y0 = y - h / 2;
+    if (x0 + w > bounds[2] + this.borderwidth) {
+        x0 = bounds[2] + this.borderwidth - w;
     }
-    if (y0 + this.canvas.height > bounds[3] + this.borderwidth) {
-        y0 = bounds[3] + this.borderwidth - this.canvas.height;
+    if (y0 + h > bounds[3] + this.borderwidth) {
+        y0 = bounds[3] + this.borderwidth - h;
     }
     if (x0 < 0) {
         x0 = 0;
