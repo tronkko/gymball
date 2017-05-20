@@ -32,27 +32,44 @@ Game.prototype.constructor = Game;
 Game.prototype.setup = function (level) {
     switch (level) {
     case 0:
-        this.scene = new StaticScene ({
+        this.scene = new PlayScene ({
+            startpos: [ 400, 940 ],
+            bounds: [ 0, 0, 720, 1024 ],
             images: {
-                background: 'img/grandmaList.png',
+                counter: 'img/counter.png',
+                shelfLeft: 'img/shelfLeft.png',
+                basket: 'img/basket.png',
+                shelfTop: 'img/shelfTop.png',
+                jauhopussi: 'img/jauhopussi.png',
+                banaani: 'img/banaani.png',
+                background: 'img/bg.png',
             },
-            nextScene: 1,
+            obstacles: [
+                [ 'counter', 150, 140 ],
+                [ 'shelfLeft', 450, 200 ],
+                [ 'shelfTop', 0, 900 ],
+                [ 'shelfTop', 500, 900 ],
+                [ 'basket', 300, 600 ],
+            ],
+            collectibles: [
+                [ 'banaani', 300+10, 600+10, 0 ],
+                [ 'jauhopussi', 450+10, 200+80, 1 ],
+                [ 'jauhopussi', 150+10, 140+100, 1 ],
+            ],
+            next: function (game) {
+                game.setup (1);
+            },
         });
         break;
 
     case 1:
-        this.scene = new PlayScene ({
-            startpos: [ 150, 480 ],
-            bounds: [ 10, 10, 1024, 1920 ],
+        this.scene = new StaticScene ({
             images: {
-                counter: 'img/counter.png',
-                shelfLeft: 'img/shelfLeft.png',
-                background: 'img/bg.png',
+                background: 'img/grandmaList.png',
             },
-            objects: [
-                [ 'counter', 200, 200 ],
-                [ 'shelfLeft', 600, 200 ],
-            ],
+            next: function (game) {
+                game.setup (0);
+            },
         });
         break;
 

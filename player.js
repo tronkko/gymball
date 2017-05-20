@@ -47,15 +47,15 @@ Player.prototype.motion = function (ev) {
     var dir = ev.alpha
 
     /* Compute direction of change */
-    var dx = lr * this.speed;
-    var dy = fb * this.speed;
+    var dx = lr;
+    var dy = fb;
 
     /* Allow small error in movement */
     var len = Math.sqrt (dx * dx + dy * dy);
     if (len > this.sensitivity) {
         /* Movement large enough */
-        this.dx = dx;
-        this.dy = dy;
+        this.dx = dx * this.speed;
+        this.dy = dy * this.speed;
     } else {
         this.dx = 0;
         this.dy = 0;
@@ -126,7 +126,7 @@ Player.prototype.update = function () {
     case 'still':
         /* Wait until player starts moving */
         if (this.phase < this.animspeed) {
-            if (distance < this.sensitivity) {
+            if (distance < 0.001) {
                 /* Player standing still, no animation */
                 break;
             }
@@ -139,7 +139,7 @@ Player.prototype.update = function () {
     case 'down':
         /* Change direction when at phase zero */
         if (this.phase < this.animspeed) {
-            if (distance > this.sensitivity) {
+            if (distance > 0.001) {
                 /* Still moving */
                 if (Math.abs (this.dx) < Math.abs (this.dy)) {
                     /* Moving primarily in up and down direction */

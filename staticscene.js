@@ -5,7 +5,6 @@ function StaticScene (arr) {
     this.delay = 5000;
     this.fadeIn = 1000;
     this.fadeOut = 1000;
-    this.nextScene = 0;
 
     /* Set up common properties */
     Scene.call (this, arr);
@@ -20,7 +19,7 @@ StaticScene.prototype.update = function (game) {
 
     /* Set up next scene */
     if (this.phase > this.delay) {
-        game.setup (this.nextScene);
+        this.next (game);
     }
 };
 

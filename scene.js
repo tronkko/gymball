@@ -3,8 +3,37 @@ function Scene (arr) {
     /* Set defaults */
     this.startpos = [ 0, 0 ];
     this.images = {};
-    this.pathlength = 20;
     this.borderwidth = 5;
+    this.polygons = {
+        counter: [
+            [ 13, 17 ],
+            [ 103, 16 ],
+            [ 95, 252 ],
+            [ 5, 249 ],
+        ],
+        shelfLeft: [
+            [ 50, 72 ],
+            [ 78, 5 ],
+            [ 123, 5 ],
+            [ 124, 235 ],
+            [ 110, 252 ],
+            [ 50, 251 ],
+        ],
+        shelfTop: [
+            [ 32, 27 ],
+            [ 224, 26 ],
+            [ 253, 81 ],
+            [ 253, 124 ],
+            [ 3, 124 ],
+            [ 3, 83 ],
+        ],
+        basket: [
+            [ 11, 11 ],
+            [ 116, 7 ],
+            [ 114, 116 ],
+            [ 16, 115 ],
+        ],
+    };
 
     /* Set properties */
     for (var i in arr) {
@@ -32,6 +61,10 @@ Scene.prototype.update = function (game) {
 };
 
 Scene.prototype.paint = function (ctx) {
+    /*NOP*/;
+};
+
+Scene.prototype.next = function (game) {
     /*NOP*/;
 };
 

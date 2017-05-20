@@ -2,12 +2,14 @@ function PlayScene (arr) {
     /* Set default properties */
     this.player = new Player ();
     this.path = [];
+    this.pathlength = 200;
     this.scrollx = 0;
     this.scrolly = 0;
     this.phase = 0;
     this.start = new Date ();
     this.fadeIn = 1000;
     this.fadeOut = 1000;
+    this.collected = [];
 
     /* Assign properties */
     Scene.call (this, arr);
@@ -51,15 +53,81 @@ PlayScene.prototype.update = function (game) {
         y = y2;
     }
 
-    /* Save current player position */
+    /* Avoid obstacles */
+    for (var j in this.obstacles) {
+        var i = this.obstacles[j][0];
+        if (typeof this.polygons[i] == 'undefined') {
+            /* No boundary */
+            continue;
+        }
+
+        /* Get coordinates for obstacle */
+        var offsetx = this.obstacles[j][1];
+        var offsety = this.obstacles[j][2];
+        var coords = this.polygons[i];
+
+        var x0 = coords[coords.length-1][0] + offsetx;
+        var y0 = coords[coords.length-1][1] + offsety;
+        for (var j = 0; j < coords.length; j++) {
+            var x1 = coords[j][0] + offsetx;
+            var y1 = coords[j][1] + offsety;
+
+            /* Compute direction vector (x0,y0) - (x1,y1) */
+            var dx = (x1 - x0);
+            var dy = (y1 - y0);
+
+            /* Compute direction vector (x0,y0) - (x,y) */
+            var x4 = x - x0;
+            var y4 = y - y0;
+
+            /* Compute unit vector along vector (x0,y0) - (x1,y1) */
+            var len = Math.sqrt (dx*dx + dy*dy);
+            var x5 = dx / len;
+            var y5 = dy / len;
+
+            /* Project vector (x0,y0) -> (x,y) to (x0,y0) - (x1,y1) */
+            var dot = (x4*x5 + y4*y5) / len;
+            if (dot < 0) {
+                dot = 0;
+            }
+            if (dot > 1) {
+                dot = 1;
+            }
+
+            /* Compute point closest to player in line (x0,y0) - (x1,y1) */
+            var xc = x0 + dot * dx;
+            var yc = y0 + dot * dy;
+
+            /* Compute distance to player */
+            var dx = x - xc;
+            var dy = y - yc;
+            var d = Math.sqrt (dx * dx + dy * dy);
+            var eps = this.player.width * 0.45;
+            if (d < eps) {
+                /* Player touches the boundary so bounce him back! */
+                x = xc + eps * dx / d;
+                y = yc + eps * dy / d;
+            }
+
+            x0 = x1;
+            y0 = y1;
+        }
+    }
+
+    /* Save player position (if movement is allowed) */
     this.player.x = x;
     this.player.y = y;
+
+    /* End scene if player makes it to the exit */
+    if (y < this.player.height * 0.66) {
+        this.next (game);
+    }
 
     /* Add player position to path */
     if (this.path.length > this.pathlength) {
         this.path = this.path.slice (1, this.pathlength);
     }
-    this.path[this.path.length] = [ x, y ];
+    this.path[this.path.length] = [ x, y + this.player.height * 0.4 ];
 
     /* Animate player */
     this.player.update ();
@@ -74,14 +142,13 @@ PlayScene.prototype.update = function (game) {
     /* Center screen on player */
     var x = this.player.x;
     var y = this.player.y;
-    var bw = this.borderwidth;
     var x0 = x - w / 2;
     var y0 = y - h / 2;
-    if (x0 + w > bounds[2] + bw) {
-        x0 = bounds[2] + bw - w;
+    if (x0 + w > bounds[2]) {
+        x0 = bounds[2] - w;
     }
-    if (y0 + h > bounds[3] + bw) {
-        y0 = bounds[3] + bw - h;
+    if (y0 + h > bounds[3]) {
+        y0 = bounds[3] - h;
     }
     if (x0 < 0) {
         x0 = 0;
@@ -91,6 +158,49 @@ PlayScene.prototype.update = function (game) {
     }
     this.scrollx = x0;
     this.scrolly = y0;
+
+    /* Grab collectibles */
+    for (var i in this.collectibles) {
+        var arr = this.collectibles[i];
+
+        /* Get collectible id */
+        var id = arr[0];
+
+        /* Get upper left corner of collectible item */
+        var x0 = arr[1];
+        var y0 = arr[2];
+
+        /* Get width and height of item */
+        var w;
+        var h;
+        if (this.images[id]) {
+            w = this.images[id].width;
+            h = this.images[id].height;
+        } else {
+            w = 100;
+            h = 100;
+        }
+
+        /* Compute center coordinate of collectible item */
+        var x1 = x0 + w / 2;
+        var y1 = y0 + h / 2;
+
+        /* Compute distance to player */
+        var dx = x - x1;
+        var dy = y - y1;
+        var distance = Math.sqrt (dx * dx + dy * dy);
+        var eps = this.player.width;
+        if (distance < eps) {
+
+            /* Got collectible! */
+            this.collected[this.collected.length] = id;
+
+            /* Remove collectible from view */
+            delete this.collectibles[i];
+
+        }
+
+    }
 };
 
 PlayScene.prototype.paint = function (ctx) {
@@ -98,15 +208,9 @@ PlayScene.prototype.paint = function (ctx) {
 
     /* Fade in and out */
     if (this.phase < this.fadeIn) {
-
-        /* Fading in */
         ctx.globalAlpha = this.phase / this.fadeIn;
-
     } else {
-
-        /* Static display */
         ctx.globalAlpha = 1.0;
-
     }
 
     /* Scroll view */
@@ -132,9 +236,9 @@ PlayScene.prototype.paint = function (ctx) {
     }
     ctx.stroke ();
 
-    /* Draw objects */
-    for (var i in this.objects) {
-        var arr = this.objects[i];
+    /* Draw obstacles */
+    for (var i in this.obstacles) {
+        var arr = this.obstacles[i];
         var id = arr[0];
         if (this.images[id]) {
             ctx.drawImage (this.images[id], arr[1], arr[2]);
@@ -157,6 +261,72 @@ PlayScene.prototype.paint = function (ctx) {
     ctx.lineTo (bounds[0] - bw, bounds[1] - bw);
     ctx.fill ();
 
+    /* Draw obstacle boundaries */
+    ctx.strokeStyle = '#f0f';
+    for (var j in this.obstacles) {
+        /* See if object has a boundary */
+        var i = this.obstacles[j][0];
+        if (typeof this.polygons[i] == 'undefined') {
+            /* Boundary not defined */
+            continue;
+        }
+
+        /* Get coordinates for obstacle */
+        var offsetx = this.obstacles[j][1];
+        var offsety = this.obstacles[j][2];
+        var coords = this.polygons[i];
+
+        /* Draw obstacle boundary */
+        ctx.beginPath ();
+        var x0 = coords[coords.length-1][0] + offsetx;
+        var y0 = coords[coords.length-1][1] + offsety;
+        ctx.moveTo (x0, y0);
+        for (var j = 0; j < coords.length; j++) {
+            var x1 = coords[j][0] + offsetx;
+            var y1 = coords[j][1] + offsety;
+            ctx.lineTo (x1, y1);
+
+            x0 = x1;
+            y0 = y1;
+        }
+        ctx.stroke ();
+    }
+
+    /* Draw collectibles */
+    var highlight = true;
+    for (var i in this.collectibles) {
+        var arr = this.collectibles[i];
+        var id = arr[0];
+        if (!this.images[id]) {
+            continue;
+        }
+
+        /* Highlight first active item */
+        if (arr[3]  &&  highlight) {
+            /* Highlight item */
+            var w = this.images[id].width;
+            var h = this.images[id].height;
+            var x0 = arr[1] + w / 2;
+            var y0 = arr[2] + h / 2;
+            var d = 1 + Math.abs ((this.phase % 1000) / 1000 * 2 - 1) * 0.2;
+            ctx.drawImage (
+                this.images[id], 
+                0,
+                0,
+                w,
+                h,
+                x0 - w * d / 2,
+                y0 - h * d / 2,
+                w * d,
+                h * d
+            );
+            highlight = false;
+        } else {
+            /* No highlight */
+            ctx.drawImage (this.images[id], arr[1], arr[2]);
+        }
+    }
+
     /* Get player position */
     var x = this.player.x;
     var y = this.player.y;
@@ -164,14 +334,16 @@ PlayScene.prototype.paint = function (ctx) {
     var h = this.player.height;
 
     /* Draw player's path */
-    if (this.path.length > 2) {
+    if (this.path.length > 3) {
         ctx.strokeStyle = '#f00';
+        ctx.lineWidth = 2;
         ctx.beginPath ();
         ctx.moveTo (this.path[0][0], this.path[0][1]);
-        for (var i = 1; i < this.path.length; i++) {
+        for (var i = 2; i < this.path.length; i++) {
             ctx.lineTo (this.path[i][0], this.path[i][1]);
         }
         ctx.stroke ();
+        ctx.lineWidth = 1;
     }
 
     /* Draw player */
