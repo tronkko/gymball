@@ -15,7 +15,7 @@ function Player () {
 
     /* Load sprite sheet */
     this.spritesheet = new Image ();
-    this.spritesheet.src = 'img/bg.png';
+    this.spritesheet.src = 'img/grandpaSpriteSheet.png';
     this.phase = 0;
     this.direction = 'still';
     this.animspeed = 2;
@@ -82,11 +82,11 @@ Player.prototype.paint = function (ctx) {
         break;
 
     case 'right':
-        row = 1;
+        row = 2;
         break;
 
     case 'left':
-        row = 2;
+        row = 1;
         break;
 
     case 'down':
