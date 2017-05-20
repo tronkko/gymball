@@ -1,3 +1,23 @@
+/* Trap errors */
+window.onerror = function (msg, url, lineNo, columnNo, error) {
+    var string = msg.toLowerCase ();
+    var substring = "script error";
+    if (string.indexOf (substring) > -1){
+        alert ('Script Error: See Browser Console for Detail');
+    } else {
+        var message = [
+            'Message: ' + msg,
+            'URL: ' + url,
+            'Line: ' + lineNo,
+            'Column: ' + columnNo,
+            'Error object: ' + JSON.stringify(error)
+        ].join(' - ');
+
+        alert (message);
+    }
+    return false;
+};
+
 /* Construct game */
 function Game () {
     /* Initialize object */
@@ -9,19 +29,15 @@ function Game () {
     this.x = 0;
     this.y = 0;
 
+    /* Initialize player */
+    this.player = new Player ();
+
     /* Initialize canvas */
     this.canvas = document.getElementById ('canvas');
     this.ctx = canvas.getContext ('2d');
 
     /* Resize canvas to fill the screen */
     this.resize ();
-
-    /* Position player in the middle of screen */
-    var w = this.canvas.width;
-    var h = this.canvas.height;
-
-    /* Initialize player */
-    this.player = new Player ();
 
     /* Set up animation frame */
     var _self = this;
@@ -38,6 +54,8 @@ function Game () {
     /* Set up scene */
     this.setup (0);
 }
+Game.prototype = {};
+Game.prototype.constructor = Game;
 
 /* Set up scene */
 Game.prototype.setup = function (level) {
@@ -45,7 +63,7 @@ Game.prototype.setup = function (level) {
     case 0:
         this.scene = new Scene ({
             startpos: [ 150, 480 ],
-            bounds: [ 10, 10, 1920, 1024 ],
+            bounds: [ 10, 10, 1024, 1920 ],
             bg: 'img/bg.png',
             images: {
                 counter: 'img/counter.png',
@@ -53,13 +71,17 @@ Game.prototype.setup = function (level) {
             },
             objects: [
                 [ 'counter', 200, 200 ],
-                [ 'shelfLeft', 200, 600 ],
+                [ 'shelfLeft', 600, 200 ],
             ],
+            paint: function (ctx) {
+            },
+            update: function () {
+            },
         });
         break;
 
     default:
-        alert ('Invalid level ' + level);
+        throw new Error ('Invalid level ' + level);
     }
 
     /* Set player start position */
@@ -77,6 +99,9 @@ Game.prototype.setup = function (level) {
         img.src = this.scene.images[i];
         this.images[i] = img;
     }
+
+    /* Reset path */
+    this.path = [];
 };
 
 /* Handle window resize */
@@ -152,6 +177,9 @@ Game.prototype.update = function () {
     }
     this.x = x0;
     this.y = y0;
+
+    /* Animate player */
+    this.player.update ();
 }
 
 /* Animate cycle */
@@ -240,8 +268,9 @@ Game.prototype.paint = function () {
     }
 
     /* Draw player */
+    this.player.paint (ctx);
     ctx.fillStyle = '#000';
-    ctx.fillRect (x - w/2, y - h/2, w, h);
+    ctx.fillText (this.player.phase, 10, 20);
 
     /* Restore position */
     ctx.restore ();
