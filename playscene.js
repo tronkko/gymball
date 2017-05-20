@@ -10,6 +10,21 @@ function PlayScene (arr) {
     this.fadeIn = 1000;
     this.fadeOut = 1000;
     this.collected = [];
+    this.required = {};
+    this.euro = [];
+    this.prices = {
+        banaani: 4.32,
+        jauhopussi: 1.23,
+        kahvi: 4.55,
+        kala: 12.37,
+        kettukarkki: 2.3,
+        kukka: 20.3,
+        makkara: 3.2,
+        omena: 2.3,
+        pullapussi: 4.2,
+        euro: 0,
+    };
+    this.money = 100.0;
 
     /* Assign properties */
     Scene.call (this, arr);
@@ -118,9 +133,9 @@ PlayScene.prototype.update = function (game) {
     this.player.x = x;
     this.player.y = y;
 
-    /* End scene if player makes it to the exit */
+    /* End scene if player makes it to the exit with all stuff paid for */
     if (y < this.player.height * 0.66) {
-        this.next (game);
+        this.endLevel (game);
     }
 
     /* Add player position to path */
@@ -192,14 +207,75 @@ PlayScene.prototype.update = function (game) {
         var eps = this.player.width;
         if (distance < eps) {
 
-            /* Got collectible! */
+            /* Add collectible to shopping cart */
             this.collected[this.collected.length] = id;
 
-            /* Remove collectible from view */
+            /* Substract money from wallet */
+            if (typeof this.prices[id] != 'undefined') {
+                this.money -= this.prices[id];
+            }
+
+            /* Remove collectible from view but save cashier */
+            if (id == 'euro') {
+                this.euro = this.collectibles[i];
+            }
             delete this.collectibles[i];
+
+            /* 
+             * Make sure that cashier is active after you purchase an item.
+             * This is essential after player returns to get an items AFTER
+             * visiting the cashier.
+             */
+            switch (id) {
+            case 'euro':
+            case 'exit':
+                /* No need to visit cashier */
+                /*NOP*/;
+                break;
+
+            default:
+                /* Must visit cashier */
+                if (this.euro.length > 0) {
+                    this.collectibles[this.collectibles.length] = this.euro;
+                    this.euro = [];
+                }
+            }
+            break;
 
         }
 
+    }
+};
+PlayScene.prototype.endLevel = function (game) {
+    var exit = true;
+
+    /* Check whether player can exit the shop */
+    for (var i in this.collected) {
+        var id = this.collected[i];
+        switch (id) {
+        case 'euro':
+            /* Went through cashier */
+            exit = true;
+            break;
+
+        case 'exit':
+            /* No need to visit cashier just for this */
+            /*NOP*/;
+            break;
+
+        default:
+            /* Bought something, require visit to cashier */
+            exit = false;
+        }
+    }
+
+    /* Exit shop if items bought */
+    if (exit) {
+        if (this.gotEverything ()) {
+            this.success (game);
+        } else {
+            this.failure (game);
+        }
     }
 };
 
@@ -217,8 +293,8 @@ PlayScene.prototype.paint = function (ctx) {
     ctx.translate (-this.scrollx, -this.scrolly);
 
     /* Draw background image */
-    if (this.images['background']) {
-        ctx.drawImage (this.images['background'], 0, 0);
+    if (this.images[this.background]) {
+        ctx.drawImage (this.images[this.background], 0, 0);
     }
 
     /* Draw background grid */
@@ -351,5 +427,89 @@ PlayScene.prototype.paint = function (ctx) {
 
     /* Restore coordinate system */
     ctx.restore ();
+
+    /* Compute width of screen in scaled coordinates */
+    var cw = ctx.canvas.width;
+    var ch = ctx.canvas.height;
+    var w = window.innerWidth * (ch / window.innerHeight);
+    if (w > cw) {
+        w = cw;
+    }
+
+    /* Draw HUD background */
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect (0, 0, w, 80);
+
+    /* Format money */
+    var euros = Math.floor (this.money);
+    var cents = '' + (100 + Math.floor ((this.money % 1) * 100));
+    var money = 'Eurot ' + euros + ',' + cents.substr (1);
+
+    /* Output money */
+    ctx.fillStyle = 'rgba(255,255,255,1)';
+    ctx.font = '48px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText (money, 10, 60);
+
+    /* Format time */
+    var time = 'Aika ';
+    var t = Math.floor (this.phase / 1000);
+    var min = Math.floor (t / 60);
+    if (min < 10) {
+        time += '0' + min;
+    } else {
+        time += min;
+    }
+    time += ':';
+    var sec = Math.floor (t % 60);
+    if (sec < 10) {
+        time += '0' + sec;
+    } else {
+        time += sec;
+    }
+
+    /* Paint time */
+    ctx.fillStyle = 'rgba(255,255,255,1)';
+    ctx.font = '48px Arial';
+    ctx.textAlign = 'right';
+    ctx.fillText (time, w - 10, 60);
 };
 
+/* Check if player got everything */
+Scene.prototype.gotEverything = function () {
+    /* Compute items in the cart */
+    var counts = {};
+    for (var i in this.collected) {
+        var id = this.collected[i];
+        if (typeof counts[id] == 'undefined') {
+            counts[id] = 0;
+        }
+        counts[id]++;
+    }
+
+    /* Loop through required items */
+    var ok = true;
+    for (var id in this.required) {
+        /* Get number of items required */
+        var required = this.required[id];
+
+        /* Get number of items bought */
+        if (typeof counts[id] != 'undefined') {
+            collected = counts[id];
+        } else {
+            collected = 0;
+        }
+
+        /* See if the request is fulfilled */
+        if (collected < required) {
+            ok = false;
+            break;
+        }
+    }
+
+    /* Did not get everything if run out of money */
+    if (this.money < 0.001) {
+        ok = false;
+    }
+    return ok;
+};

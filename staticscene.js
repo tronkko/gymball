@@ -45,8 +45,8 @@ StaticScene.prototype.paint = function (ctx) {
     }
 
     /* Draw background image */
-    if (this.images['background']) {
-        ctx.drawImage (this.images['background'], 0, 0);
+    if (this.images[this.background]) {
+        ctx.drawImage (this.images[this.background], 0, 0);
     }
 
     ctx.restore ();

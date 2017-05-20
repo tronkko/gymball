@@ -2,6 +2,7 @@
 function Game () {
     /* Initialize object */
     this.scene = new Scene ({});
+    this.money = 1000.0;
 
     /* Initialize canvas */
     this.canvas = document.getElementById ('canvas');
@@ -23,7 +24,7 @@ function Game () {
     });
 
     /* Set up first scene */
-    this.setup (0);
+    this.setup (2);
 }
 Game.prototype = {};
 Game.prototype.constructor = Game;
@@ -35,15 +36,6 @@ Game.prototype.setup = function (level) {
         this.scene = new PlayScene ({
             startpos: [ 400, 940 ],
             bounds: [ 0, 0, 720, 1024 ],
-            images: {
-                counter: 'img/counter.png',
-                shelfLeft: 'img/shelfLeft.png',
-                basket: 'img/basket.png',
-                shelfTop: 'img/shelfTop.png',
-                jauhopussi: 'img/jauhopussi.png',
-                banaani: 'img/banaani.png',
-                background: 'img/bg.png',
-            },
             obstacles: [
                 [ 'counter', 150, 140 ],
                 [ 'shelfLeft', 450, 200 ],
@@ -54,24 +46,74 @@ Game.prototype.setup = function (level) {
             collectibles: [
                 [ 'banaani', 300+10, 600+10, 0 ],
                 [ 'jauhopussi', 450+10, 200+80, 1 ],
-                [ 'jauhopussi', 150+10, 140+100, 1 ],
+                [ 'kahvi', 0+80, 900+20, 0 ],
+                [ 'kahvi', 500+80, 900+20, 0 ],
+                [ 'euro', 150+10, 140+100, 1 ],
             ],
-            next: function (game) {
+            money: 55,
+            required: {
+                jauhopussi: 1,
+            },
+            success: function (game) {
                 game.setup (1);
+            },
+            failure: function (game) {
+                game.setup (0);
             },
         });
         break;
 
     case 1:
         this.scene = new StaticScene ({
-            images: {
-                background: 'img/grandmaList.png',
+            background: 'grandmaList',
+            next: function (game) {
+                game.setup (2);
             },
+        });
+        break;
+
+    case 2:
+        this.scene = new PlayScene ({
+            startpos: [ 400, 940 ],
+            bounds: [ 0, 0, 720, 1024 ],
+            obstacles: [
+                [ 'counter', 550, 140 ],
+                [ 'shelfLeft', 600, 600 ],
+                [ 'shelfTop', 0, 900 ],
+                [ 'shelfTop', 500, 900 ],
+                [ 'basket', 300, 600 ],
+                [ 'shelfRight', 10, 250 ],
+            ],
+            collectibles: [
+                [ 'banaani', 300+10, 600+10, 0 ],
+                [ 'jauhopussi', 600+10, 600+80, 1 ],
+                [ 'jauhopussi', 10+20, 250+80, 1 ],
+                [ 'makkara', 0+80, 900+20, 0 ],
+                [ 'kettukarkki', 500+80, 900+20, 0 ],
+                [ 'euro', 550+10, 140+100, 1 ],
+            ],
+            money: 30,
+            required: {
+                jauhopussi: 2,
+            },
+            success: function (game) {
+                game.setup (3);
+            },
+            failure: function (game) {
+                game.setup (2);
+            },
+        });
+        break;
+
+    case 3:
+        this.scene = new StaticScene ({
+            background: 'grandmaList',
             next: function (game) {
                 game.setup (0);
             },
         });
         break;
+
 
     default:
         throw new Error ('Invalid level ' + level);

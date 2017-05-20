@@ -2,7 +2,26 @@
 function Scene (arr) {
     /* Set defaults */
     this.startpos = [ 0, 0 ];
-    this.images = {};
+    this.images = {
+        counter: 'img/counter.png',
+        shelfLeft: 'img/shelfLeft.png',
+        basket: 'img/basket.png',
+        shelfTop: 'img/shelfTop.png',
+        banaani: 'img/banaani.png',
+        jauhopussi: 'img/jauhopussi.png',
+        kahvi: 'img/kahvi.png',
+        kala: 'img/kala.png',
+        kettukarkki: 'img/kettukarkki.png',
+        kukka: 'img/kukka.png',
+        makkara: 'img/makkara.png',
+        omena: 'img/omena.png',
+        pullapussi: 'img/pullapussi.png',
+        bg: 'img/bg.png',
+        shelfRight: 'img/shelfRight.png',
+        grandmaList: 'img/grandmaList.png',
+        euro: 'img/omena.png',
+    };
+    this.background = 'bg';
     this.borderwidth = 5;
     this.polygons = {
         counter: [
@@ -32,6 +51,14 @@ function Scene (arr) {
             [ 116, 7 ],
             [ 114, 116 ],
             [ 16, 115 ],
+        ],
+        shelfRight: [
+            [ 5, 5 ],
+            [ 50, 6 ],
+            [ 79, 75 ],
+            [ 79, 251 ],
+            [ 17, 252 ],
+            [ 3, 235 ],
         ],
     };
 
@@ -67,5 +94,6 @@ Scene.prototype.paint = function (ctx) {
 Scene.prototype.next = function (game) {
     /*NOP*/;
 };
+
 
 
