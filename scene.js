@@ -19,6 +19,7 @@ function Scene (arr) {
         bg: 'img/bg.png',
         shelfRight: 'img/shelfRight.png',
         grandmaList: 'img/grandmaList.png',
+        grandmaAngry: 'img/grandmaAngry.png',
         euro: 'img/omena.png',
     };
     this.background = 'bg';

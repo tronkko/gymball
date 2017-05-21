@@ -5,6 +5,7 @@ function StaticScene (arr) {
     this.delay = 5000;
     this.fadeIn = 1000;
     this.fadeOut = 1000;
+    this.text = [];
 
     /* Set up common properties */
     Scene.call (this, arr);
@@ -47,6 +48,19 @@ StaticScene.prototype.paint = function (ctx) {
     /* Draw background image */
     if (this.images[this.background]) {
         ctx.drawImage (this.images[this.background], 0, 0);
+    }
+
+    /* Draw texts */
+    if (this.text.length > 0) {
+        var x = 350;
+        var y = 150;
+        ctx.fillStyle = '#000';
+        ctx.font = 'bold 52px Arial';
+        ctx.textAlign = 'center';
+        for (var i = 0; i < this.text.length; i++) {
+            ctx.fillText (this.text[i], x, y);
+            y += 72;
+        }
     }
 
     ctx.restore ();

@@ -24,7 +24,7 @@ function Game () {
     });
 
     /* Set up first scene */
-    this.setup (2);
+    this.setup (1);
 }
 Game.prototype = {};
 Game.prototype.constructor = Game;
@@ -65,7 +65,13 @@ Game.prototype.setup = function (level) {
 
     case 1:
         this.scene = new StaticScene ({
-            background: 'grandmaList',
+            background: 'grandmaAngry',
+            delay: 15000,
+            text: [
+                'Pertti! Miksi et',
+                'tuonut mitä käskin?',
+                'Yritä uudestaan!',
+            ],
             next: function (game) {
                 game.setup (2);
             },
@@ -107,7 +113,7 @@ Game.prototype.setup = function (level) {
 
     case 3:
         this.scene = new StaticScene ({
-            background: 'grandmaList',
+            background: 'grandmaAngry',
             next: function (game) {
                 game.setup (0);
             },
