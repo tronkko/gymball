@@ -1,6 +1,8 @@
 function PlayScene (arr) {
     /* Set default properties */
     this.player = new Player ();
+    this.startpos = [ 0, 0 ];
+    this.exitpos = [ 0, 0 ];
     this.path = [];
     this.pathlength = 200;
     this.scrollx = 0;
@@ -11,7 +13,7 @@ function PlayScene (arr) {
     this.fadeOut = 1000;
     this.collected = [];
     this.required = {};
-    this.euro = [];
+    this.cashier = [];
     this.prices = {
         banaani: 4.32,
         jauhopussi: 1.23,
@@ -133,9 +135,22 @@ PlayScene.prototype.update = function (game) {
     this.player.x = x;
     this.player.y = y;
 
-    /* End scene if player makes it to the exit with all stuff paid for */
-    if (y < this.player.height * 0.66) {
-        this.endLevel (game);
+    /* Does the player touch the exit button? */
+    if (this.images['exit']) {
+        var exitx = this.exitpos[0] + this.images['exit'].width / 2;
+        var exity = this.exitpos[1] + this.images['exit'].height / 2;
+        var dx = x - exitx;
+        var dy = y - exity;
+        var distance = Math.sqrt (dx * dx + dy * dy);
+        if (distance < this.images['exit'].width / 2) {
+            if (this.canExit ()) {
+                if (this.gotEverything ()) {
+                    this.success (game);
+                } else {
+                    this.failure (game);
+                }
+            }
+        }
     }
 
     /* Add player position to path */
@@ -214,10 +229,15 @@ PlayScene.prototype.update = function (game) {
             if (typeof this.prices[id] != 'undefined') {
                 this.money -= this.prices[id];
             }
+            
+            /* Exit level if run out of money */
+            if (this.money < 0.001) {
+                this.failure (game);
+            }
 
             /* Remove collectible from view but save cashier */
             if (id == 'euro') {
-                this.euro = this.collectibles[i];
+                this.cashier = this.collectibles[i];
             }
             delete this.collectibles[i];
 
@@ -228,16 +248,15 @@ PlayScene.prototype.update = function (game) {
              */
             switch (id) {
             case 'euro':
-            case 'exit':
                 /* No need to visit cashier */
                 /*NOP*/;
                 break;
 
             default:
                 /* Must visit cashier */
-                if (this.euro.length > 0) {
-                    this.collectibles[this.collectibles.length] = this.euro;
-                    this.euro = [];
+                if (this.cashier.length > 0) {
+                    this.collectibles[this.collectibles.length] = this.cashier;
+                    this.cashier = [];
                 }
             }
             break;
@@ -246,7 +265,7 @@ PlayScene.prototype.update = function (game) {
 
     }
 };
-PlayScene.prototype.endLevel = function (game) {
+PlayScene.prototype.canExit = function () {
     var exit = true;
 
     /* Check whether player can exit the shop */
@@ -258,25 +277,17 @@ PlayScene.prototype.endLevel = function (game) {
             exit = true;
             break;
 
-        case 'exit':
-            /* No need to visit cashier just for this */
-            /*NOP*/;
-            break;
-
         default:
             /* Bought something, require visit to cashier */
             exit = false;
         }
     }
 
-    /* Exit shop if items bought */
-    if (exit) {
-        if (this.gotEverything ()) {
-            this.success (game);
-        } else {
-            this.failure (game);
-        }
+    /* Player cannot exit the shop emptyhanded */
+    if (this.collected.length == 0) {
+        exit = false;
     }
+    return exit;
 };
 
 PlayScene.prototype.paint = function (ctx) {
@@ -295,6 +306,25 @@ PlayScene.prototype.paint = function (ctx) {
     /* Draw background image */
     if (this.images[this.background]) {
         ctx.drawImage (this.images[this.background], 0, 0);
+    }
+
+    /* Draw exit arrow */
+    if (this.canExit ()) {
+        if (this.images['exit']) {
+            ctx.drawImage(
+                this.images['exit'],
+                this.exitpos[0],
+                this.exitpos[1]
+            );
+        }
+    } else {
+        if (this.images['noexit']) {
+            ctx.drawImage(
+                this.images['noexit'],
+                this.exitpos[0],
+                this.exitpos[1]
+            );
+        }
     }
 
     /* Draw background grid */
@@ -411,14 +441,40 @@ PlayScene.prototype.paint = function (ctx) {
 
     /* Draw player's path */
     if (this.path.length > 3) {
-        ctx.strokeStyle = '#f00';
         ctx.lineWidth = 2;
+
+        ctx.strokeStyle = 'rgba(255,0,0,0.2)';
+        ctx.beginPath ();
+        ctx.moveTo (this.path[0][0], this.path[0][1]);
+        for (var i = 2; i < this.path.length * 1 / 4; i++) {
+            ctx.lineTo (this.path[i][0], this.path[i][1]);
+        }
+        ctx.stroke ();
+
+        ctx.strokeStyle = 'rgba(255,0,0,0.5)';
+        ctx.beginPath ();
+        ctx.moveTo (this.path[0][0], this.path[0][1]);
+        for (var i = 2; i < this.path.length * 2 / 4; i++) {
+            ctx.lineTo (this.path[i][0], this.path[i][1]);
+        }
+        ctx.stroke ();
+
+        ctx.strokeStyle = 'rgba(255,0,0,0.7)';
+        ctx.beginPath ();
+        ctx.moveTo (this.path[0][0], this.path[0][1]);
+        for (var i = 2; i < this.path.length * 3 / 4; i++) {
+            ctx.lineTo (this.path[i][0], this.path[i][1]);
+        }
+        ctx.stroke ();
+
+        ctx.strokeStyle = 'rgba(255,0,0,1.0)';
         ctx.beginPath ();
         ctx.moveTo (this.path[0][0], this.path[0][1]);
         for (var i = 2; i < this.path.length; i++) {
             ctx.lineTo (this.path[i][0], this.path[i][1]);
         }
         ctx.stroke ();
+
         ctx.lineWidth = 1;
     }
 

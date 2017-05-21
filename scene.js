@@ -1,26 +1,32 @@
 /* Construct scene */
 function Scene (arr) {
     /* Set defaults */
-    this.startpos = [ 0, 0 ];
     this.images = {
         counter: 'img/counter.png',
         shelfLeft: 'img/shelfLeft.png',
         basket: 'img/basket.png',
         shelfTop: 'img/shelfTop.png',
+        shelfBottom: 'img/shelfBottom.png',
         banaani: 'img/banaani.png',
         jauhopussi: 'img/jauhopussi.png',
         kahvi: 'img/kahvi.png',
         kala: 'img/kala.png',
         kettukarkki: 'img/kettukarkki.png',
         kukka: 'img/kukka.png',
+        kurkku: 'img/kurkku.png',
         makkara: 'img/makkara.png',
+        mansikka: 'img/mansikka.png',
         omena: 'img/omena.png',
         pullapussi: 'img/pullapussi.png',
         bg: 'img/bg.png',
         shelfRight: 'img/shelfRight.png',
         grandmaList: 'img/grandmaList.png',
         grandmaAngry: 'img/grandmaAngry.png',
-        euro: 'img/omena.png',
+        grandmaHappy: 'img/grandmaHappy.png',
+        exit: 'img/arrow.png',
+        noexit: 'img/arrowEmpty.png',
+        euro: 'img/coin.png',
+        tossunalla: 'img/tossunalla.png',
     };
     this.background = 'bg';
     this.borderwidth = 5;
@@ -60,6 +66,14 @@ function Scene (arr) {
             [ 79, 251 ],
             [ 17, 252 ],
             [ 3, 235 ],
+        ],
+        shelfBottom: [
+            [ 2, 4 ],
+            [ 255, 4 ],
+            [ 253, 46 ],
+            [ 224, 102 ],
+            [ 33, 102 ],
+            [ 3, 47 ],
         ],
     };
 
