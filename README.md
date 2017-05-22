@@ -73,7 +73,7 @@ Programming
 Toni Rönkkö
 
 Design  
-Heidi Kervinen
+Heidi Kervinen & others
 
 # Thanks
 
