@@ -63,6 +63,18 @@ In your mobile phone:
 5. Place the mobile phone to the holster in the balance board
 6. Step on the balance board and play!
 
+# Credits
+
+Graphics  
+Arttu Savolainen  
+http://r2graphics.fi/
+
+Programming  
+Toni Rönkkö
+
+Design  
+Heidi Kervinen
+
 # Thanks
 
 Games for Health Finland / Tiina Arpola & Antti Kotimaa  
