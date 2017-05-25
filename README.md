@@ -73,7 +73,12 @@ Programming
 Toni Rönkkö
 
 Design  
-Heidi Kervinen & others
+Sigrun Arngrimsdottir  
+Christina Holm Jensen  
+Rilind Obertinca  
+Tomi Sillanpää  
+Helga Jakola  
+Heidi Kervinen
 
 # Thanks
 
